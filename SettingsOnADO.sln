@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34601.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SettingsOnADO", "src\SettingsOnADO\SettingsOnADO.csproj", "{1F803D52-6023-4F73-B82C-12ED6C95F0BD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{70A02598-D38C-48A0-A205-21A9683AD1AB}"
+	ProjectSection(SolutionItems) = preProject
+		Packages.props = Packages.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{8EEAF87B-A050-4BDE-9DCB-452B6C38DD3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettingsOnADO.Tests", "tests\SettingsOnADO.Tests\SettingsOnADO.Tests.csproj", "{472F3484-125B-430A-94D1-44CF0812B5D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettingsOnADO.Json", "src\SettingsOnADO.Json\SettingsOnADO.Json.csproj", "{57E40730-2F89-4029-9587-22A69ABC0501}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettingsOnADO.Json", "tests\SettingsOnADO.Json.Tests\SettingsOnADO.Json.Tests.csproj", "{71FDCD10-0664-452F-97A9-BDA216ADF560}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1F803D52-6023-4F73-B82C-12ED6C95F0BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F803D52-6023-4F73-B82C-12ED6C95F0BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F803D52-6023-4F73-B82C-12ED6C95F0BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F803D52-6023-4F73-B82C-12ED6C95F0BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{472F3484-125B-430A-94D1-44CF0812B5D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{472F3484-125B-430A-94D1-44CF0812B5D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{472F3484-125B-430A-94D1-44CF0812B5D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{472F3484-125B-430A-94D1-44CF0812B5D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57E40730-2F89-4029-9587-22A69ABC0501}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57E40730-2F89-4029-9587-22A69ABC0501}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57E40730-2F89-4029-9587-22A69ABC0501}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57E40730-2F89-4029-9587-22A69ABC0501}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71FDCD10-0664-452F-97A9-BDA216ADF560}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71FDCD10-0664-452F-97A9-BDA216ADF560}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71FDCD10-0664-452F-97A9-BDA216ADF560}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71FDCD10-0664-452F-97A9-BDA216ADF560}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{472F3484-125B-430A-94D1-44CF0812B5D7} = {8EEAF87B-A050-4BDE-9DCB-452B6C38DD3D}
+		{71FDCD10-0664-452F-97A9-BDA216ADF560} = {8EEAF87B-A050-4BDE-9DCB-452B6C38DD3D}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7B6BA19A-CD7E-45A2-979C-83702D52A0EB}
+	EndGlobalSection
+EndGlobal

@@ -1,10 +1,8 @@
-# SettingsOnADO
-An ADO.NET extension for centralizing application settings in a database store. Each setting class corresponds to a table, with each table having a single-row configuration.
+# ServantSoftware.SettingsOnADO.Json
+
+An ADO.NET extension for centralizing application settings in a folder of JSON files. Each setting class corresponds to a JSON file, with its contents only having one instance of the setting class serialized.
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen) ![Version](https://img.shields.io/badge/version-1.0.0-blue) ![License](https://img.shields.io/badge/license-MIT-green)
-![Nuget](https://img.shields.io/nuget/v/ServantSoftware.SettingsOnADO)
-
-A specialized [JSON settings manager](README.Json.md) uses the [JSON ADO.NET Provider](https://github.com/Servant-Software-LLC/FileBased.DataProviders/blob/main/README.Data.Json.md)
 
 ## Table of Contents
 
@@ -25,20 +23,18 @@ A specialized [JSON settings manager](README.Json.md) uses the [JSON ADO.NET Pro
 ### Prerequisites
 
 - .NET Framework 4.6.1/.NET 7 or higher
-- An ADO.NET Data Provider to use for storage
 
 ### Installation
 
-1. Install the `ServantSoftware.SettingsOnADO` package via NuGet:
+1. Install the `ServantSoftware.SettingsOnADO.Json` package via NuGet:
 
 ```
-dotnet add package ServantSoftware.SettingsOnADO
+dotnet add package ServantSoftware.SettingsOnADO.Json
 ```
 
 | Package Name                   | Release (NuGet) |
 |--------------------------------|-----------------|
-| `ServantSoftware.SettingsOnADO`       | [![NuGet](https://img.shields.io/nuget/v/ServantSoftware.SettingsOnADO.svg)](https://www.nuget.org/packages/ServantSoftware.SettingsOnADO/)
-
+| `ServantSoftware.SettingsOnADO.Json`       | [![NuGet](https://img.shields.io/nuget/v/ServantSoftware.SettingsOnADO.Json.svg)](https://www.nuget.org/packages/ServantSoftware.SettingsOnADO.Json/)
 
 ### Usage
 1. Define your settings class with properties of simple data types. Here is an example:
@@ -51,20 +47,18 @@ public class TestSettings
     public string Name { get; set; }
 }
 ```
-2. Use the Get and Update methods from SettingsManager to retrieve and update settings:
+2. Use the Get and Update methods from JsonSettingsManager to retrieve and update settings:
 ```csharp
-// Set up a connection to the ADO.NET Data Provider (as needed)
-var connection = new SqliteConnection("Data Source=:memory:");
-connection.Open();
-
-// Initialize SchemaManager with the connection
-var schemaManager = new SchemaManager(connection);
+var settingsManager = new JsonSettingsManager("MyCompanyName", "MyProductName");
 
 var setting = settingsManager.Get<TestSettings>();
 setting.Name = "MyName";
 settingsManager.Update(setting);
 ```
-
+Your application settings will be stored under [Environment.SpecialFolder](https://learn.microsoft.com/en-us/dotnet/api/system.environment.specialfolder?view=net-7.0).CommonApplicationData.  For example on Windows, the default location in this sample will be:
+```
+C:\ProgramData\MyCompanyName\MyProductName\Settings
+```
 For more detailed documentation, check our [Wiki](#).
 
 ## Contributing
@@ -80,14 +74,9 @@ We welcome contributions to SettingsOnADO! Here's how you can help:
 
 Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on the process and coding standards.
 
-## Thread Safety Policy
-
-No extra threading safeguards have been put in place, other than what is provided by the ADO.NET Data Provider that is used.  It is up to the consumer of this library to put proper synchronization in place.
-
-
 ### Issues
 
-Feel free to submit issues and enhancement requests.
+Feel free to [submit issues and enhancement requests](https://github.com/Servant-Software-LLC/SettingsOnADO/issues).
 
 ## License
 

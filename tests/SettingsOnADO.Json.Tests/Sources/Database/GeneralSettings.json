@@ -1,0 +1,10 @@
+[
+  {
+    "CaseSensitive": true
+    /*This is the database name used in the MockDB GraphQL API when it is not provided for the Name field of the Database object.*/,
+    "DefaultDatabaseName": "NewMockDB",
+    "MaxAllTableRowCount": 3000,
+    "SeedDatabases": true,
+	"SettingToBeDeprecated": 1234
+  }
+]
