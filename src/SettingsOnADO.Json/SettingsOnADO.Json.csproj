@@ -5,8 +5,8 @@
 	<LangVersion>10.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <PackageId>ServantSoftware.SettingsOnADO</PackageId>
-    <Title>ServantSoftware.SettingsOnADO</Title>
+    <PackageId>ServantSoftware.SettingsOnADO.Json</PackageId>
+    <Title>ServantSoftware.SettingsOnADO.Json</Title>
     <Product>An ADO.NET extension for centralizing application settings in a folder of JSON files. Each setting class corresponds to a JSON file, with its contents only having one instance of the setting class serialized.</Product>
     <PackageReadmeFile>README.json.md</PackageReadmeFile>
   </PropertyGroup>
