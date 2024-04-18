@@ -12,6 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\README.Json.md" Link="README.Json.md" Pack="true" PackagePath="\" />
+
     <ProjectReference Include="..\SettingsOnADO\SettingsOnADO.csproj" />
 	  
 	<PackageReference Include="ServantSoftware.Data.Json" />
