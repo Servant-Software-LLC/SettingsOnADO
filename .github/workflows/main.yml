@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch:
 
 env:
@@ -47,11 +47,11 @@ jobs:
         path: ${{github.workspace}}/src/**/*.nupkg
 
     - name: Push to nuget.org (ServantSoftware.SettingsOnADO)
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/master'
       run: dotnet nuget push ${{github.workspace}}/src/bin/$BuildConfiguration/$SettingsOnADOId.$PackageVersion.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_ORG_API_KEY }} --skip-duplicate
 
     - name: Push to nuget.org (ServantSoftware.SettingsOnADO.Json)
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/master'
       run: dotnet nuget push ${{github.workspace}}/src/bin/$BuildConfiguration/$SettingsOnADOId.Json.$PackageVersion.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_ORG_API_KEY }} --skip-duplicate
 
     - name: Code Coverage Report
