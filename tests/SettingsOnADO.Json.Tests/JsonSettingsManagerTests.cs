@@ -147,4 +147,34 @@ public class JsonSettingsManagerTests
         // Assert that the setting that was deprecated is not in the json text
         Assert.DoesNotContain("SettingToBeDeprecated", jsonText);
     }
+
+    [Fact]
+    public void Update_EmptyDatabase_UpdateWithDefaultsFollowedByPropertyChange()
+    {
+        // Provide a unique sandbox for this test
+        var sandboxId = $"{GetType().FullName}.{MethodBase.GetCurrentMethod()!.Name}";
+        var sandboxConnectionString = ConnectionStrings.Instance.EmptyWithTablesFolderAsDB.Sandbox("Sandbox", sandboxId);
+
+        // Arrange
+        var jsonSettingsManager = new JsonSettingsManager(sandboxConnectionString);
+        var settings = new GeneralSettings();
+
+        jsonSettingsManager.Update(settings);
+
+        // Read all the text from the GeneralSettings.json file
+        var jsonText = File.ReadAllText(Path.Combine(sandboxConnectionString.DataSource, "GeneralSettings.json"));
+        Assert.DoesNotContain("null", jsonText);
+
+        // Act
+        settings.MaxAllTableRowCount = 1001;
+        jsonSettingsManager.Update(settings);
+
+        // Assert
+
+        // Read all the text from the GeneralSettings.json file
+        jsonText = File.ReadAllText(Path.Combine(sandboxConnectionString.DataSource, "GeneralSettings.json"));
+
+        // Assert that the setting that was deprecated is not in the json text
+        Assert.DoesNotContain("null", jsonText);
+    }
 }
