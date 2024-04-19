@@ -112,11 +112,8 @@ public class SettingsRepository : ISettingsRepository
                     //Get the value of the column
                     var columnValue = dataRow[column];
 
-                    //Check if the value of the property is different from the value of the column
-                    if (!object.Equals(propertyValue, columnValue))
-                    {
-                        insertColumns.Add(new InsertValue(property.Name, propertyValue));
-                    }
+                    //Add the column for INSERT
+                    insertColumns.Add(new InsertValue(property.Name, propertyValue));
 
                     iProperty++;
                     iColumn++;
