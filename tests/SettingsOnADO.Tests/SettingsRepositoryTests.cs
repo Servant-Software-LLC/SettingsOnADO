@@ -23,7 +23,7 @@ public class SettingsRepositoryTests
 
         schemaManagerMock.Setup(m => m.GetRow(It.IsAny<string>())).Returns(row);
 
-        var repository = new SettingsRepository(schemaManagerMock.Object);
+        var repository = new SettingsRepository(schemaManagerMock.Object, null);
 
         // Act
         var result = repository.Get<TestSettings>();
@@ -35,13 +35,45 @@ public class SettingsRepositoryTests
     }
 
     [Fact]
+    public void Get_DecryptsPropertiesWithEncryptedAttribute()
+    {
+        // Arrange
+        var encryptedPassword = "EncryptedString";
+        var decryptedPassword = "Test";
+        var dataTable = new DataTable();
+        dataTable.Columns.Add("Id", typeof(int));
+        dataTable.Columns.Add("Name", typeof(string));
+        dataTable.Columns.Add("Password", typeof(string));
+        var row = dataTable.NewRow();
+        row["Id"] = 1;
+        row["Name"] = "TestName";
+        row["Password"] = encryptedPassword;
+        dataTable.Rows.Add(row);
+
+        var mockSchemaManager = new Mock<ISchemaManager>();
+        mockSchemaManager.Setup(m => m.GetRow(It.IsAny<string>())).Returns(row);
+
+        var mockEncryptionProvider = new Mock<IEncryptionProvider>();
+        mockEncryptionProvider.Setup(e => e.Decrypt(It.IsAny<string>())).Returns(decryptedPassword);
+
+        var settingsRepository = new SettingsRepository(mockSchemaManager.Object, mockEncryptionProvider.Object);
+
+        // Act
+        var result = settingsRepository.Get<TestSettingsWithEncrypted>();
+
+        // Assert
+        mockEncryptionProvider.Verify(e => e.Decrypt(encryptedPassword), Times.Once);
+        Assert.Equal(decryptedPassword, result.Password);
+    }
+
+    [Fact]
     public void Update_NewEntity_CreatesTableAndInsertsData()
     {
         // Arrange
         var schemaManagerMock = new Mock<ISchemaManager>();
         schemaManagerMock.Setup(m => m.GetRow(It.IsAny<string>())).Returns((DataRow)null); // Simulate table does not exist
 
-        var repository = new SettingsRepository(schemaManagerMock.Object);
+        var repository = new SettingsRepository(schemaManagerMock.Object, null);
         var testSettings = new TestSettings { Id = 2, Name = "NewName" };
 
         // Act
@@ -67,7 +99,7 @@ public class SettingsRepositoryTests
 
         schemaManagerMock.Setup(m => m.GetRow(It.IsAny<string>())).Returns(row);
 
-        var repository = new SettingsRepository(schemaManagerMock.Object);
+        var repository = new SettingsRepository(schemaManagerMock.Object, null);
         var updatedSettings = new TestSettings { Id = 1, Name = "UpdatedName" };
 
         // Act
@@ -77,5 +109,31 @@ public class SettingsRepositoryTests
         schemaManagerMock.Verify(m => m.DeleteTableData("TestSettings"), Times.Once);
         schemaManagerMock.Verify(m => m.InsertTableData("TestSettings", It.IsAny<IEnumerable<InsertValue>>()), Times.Once);
     }
+
+    [Fact]
+    public void Update_EncryptsPropertiesWithEncryptedAttribute()
+    {
+        // Arrange
+        var password = "Test"; 
+        var settings = new TestSettingsWithEncrypted 
+        {
+            Id = 1,
+            Name = "TestName",
+            Password = password 
+        };
+
+        var mockSchemaManager = new Mock<ISchemaManager>();
+        var mockEncryptionProvider = new Mock<IEncryptionProvider>();        
+        mockEncryptionProvider.Setup(e => e.Encrypt(It.IsAny<string>())).Returns("EncryptedString");
+
+        var settingsRepository = new SettingsRepository(mockSchemaManager.Object, mockEncryptionProvider.Object);
+
+        // Act
+        settingsRepository.Update(settings);
+
+        // Assert
+        mockEncryptionProvider.Verify(e => e.Encrypt(password), Times.Once);
+    }
+
 }
 

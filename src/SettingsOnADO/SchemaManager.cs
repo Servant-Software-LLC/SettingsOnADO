@@ -22,6 +22,8 @@ public class SchemaManager : ISchemaManager
         }
     }
 
+    public string DataSource => connection.DataSource;
+
     public DataRow? GetRow(string tableName)
     {
         // Determine if the table exists

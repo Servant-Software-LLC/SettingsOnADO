@@ -1,15 +1,18 @@
 ﻿using System.Data;
 using System.Globalization;
+using System.Reflection;
 
 namespace SettingsOnADO;
 
 public class SettingsRepository : ISettingsRepository
 {
     private readonly ISchemaManager schemaManager;
+    private readonly IEncryptionProvider? encryptionProvider;
 
-    public SettingsRepository(ISchemaManager schemaManager)
+    public SettingsRepository(ISchemaManager schemaManager, IEncryptionProvider? encryptionProvider)
     {
         this.schemaManager = schemaManager ?? throw new ArgumentNullException(nameof(schemaManager));
+        this.encryptionProvider = encryptionProvider;
     }
 
     public TSettingsEntity Get<TSettingsEntity>() where TSettingsEntity : class, new()
@@ -32,6 +35,14 @@ public class SettingsRepository : ISettingsRepository
                 if (dataRow[dataColumn] != DBNull.Value)
                 {
                     object value = dataRow[dataColumn];
+                    if (Attribute.IsDefined(property, typeof(EncryptedAttribute)) && encryptionProvider != null)
+                    {
+                        if (property.PropertyType != typeof(string))
+                            throw new InvalidOperationException("Only string properties can be encrypted.");
+
+                        value = encryptionProvider.Decrypt((string)value);
+                    }
+
                     Type targetType = property.PropertyType;
                     object convertedValue = ConvertValue(value, targetType);
 
@@ -41,24 +52,6 @@ public class SettingsRepository : ISettingsRepository
         }
 
         return settings;
-    }
-
-    private object ConvertValue(object value, Type targetType)
-    {
-        if (value.GetType() != targetType)
-        {
-            try
-            {
-                return Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
-            }
-            catch (Exception ex)
-            {
-                // Log or handle the error as appropriate
-                throw new InvalidOperationException($"Failed to convert {value.GetType().Name} to {targetType.Name}", ex);
-            }
-        }
-
-        return value;
     }
 
     public void Update<TSettingsEntity>(TSettingsEntity settings) where TSettingsEntity : class, new()
@@ -80,7 +73,7 @@ public class SettingsRepository : ISettingsRepository
             foreach (var property in entityProperties)
             {
                 //Get the value of the property
-                var propertyValue = property.GetValue(settings);
+                object? propertyValue = GetEncryptedPropertyValue(settings, property);
 
                 insertColumns.Add(new InsertValue(property.Name, propertyValue));
             }
@@ -105,7 +98,7 @@ public class SettingsRepository : ISettingsRepository
                     //The column and the property have the same name
 
                     //Get the value of the property
-                    var propertyValue = property.GetValue(settings);
+                    var propertyValue = GetEncryptedPropertyValue(settings, property);
 
                     object convertedValue = ConvertValue(propertyValue, column.DataType);
 
@@ -171,4 +164,43 @@ public class SettingsRepository : ISettingsRepository
         schemaManager.InsertTableData(tableName, insertColumns);
     }
 
+    /// <summary>
+    /// Gets the value of a property and encrypts it if the property is marked with the EncryptedAttribute and the encryption provider is available.
+    /// </summary>
+    /// <param name="property">The property to get the value from.</param>
+    /// <param name="settings">The settings object that contains the property.</param>
+    /// <returns>The encrypted property value if the property is marked with the EncryptedAttribute and the encryption provider is available, otherwise the original property value.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the property is marked with the EncryptedAttribute but its type is not string.</exception>
+    private object? GetEncryptedPropertyValue<TSettingsEntity>(TSettingsEntity settings, PropertyInfo? property) where TSettingsEntity : class, new()
+    {
+        var propertyValue = property.GetValue(settings);
+
+        if (Attribute.IsDefined(property, typeof(EncryptedAttribute)) && encryptionProvider != null)
+        {
+            if (property.PropertyType != typeof(string))
+                throw new InvalidOperationException("Only string properties can be encrypted.");
+
+            propertyValue = encryptionProvider.Encrypt((string)propertyValue);
+        }
+
+        return propertyValue;
+    }
+
+    private object ConvertValue(object value, Type targetType)
+    {
+        if (value.GetType() != targetType)
+        {
+            try
+            {
+                return Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                // Log or handle the error as appropriate
+                throw new InvalidOperationException($"Failed to convert {value.GetType().Name} to {targetType.Name}", ex);
+            }
+        }
+
+        return value;
+    }
 }

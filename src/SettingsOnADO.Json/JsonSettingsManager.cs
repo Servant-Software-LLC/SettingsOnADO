@@ -10,32 +10,32 @@ public class JsonSettingsManager : SettingsManager
     private static string basePath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
     private const string settingsFolderName = "Settings";
 
-    public JsonSettingsManager(string productName, LogLevel? logLevel = null)
-        : this(new FileInfo(Path.Combine(basePath, productName, settingsFolderName)), logLevel)
+    public JsonSettingsManager(string productName, LogLevel? logLevel = null, IEncryptionProvider? encryptionProvider = null)
+        : this(new FileInfo(Path.Combine(basePath, productName, settingsFolderName)), logLevel, encryptionProvider)
     {
 
     }
 
-    public JsonSettingsManager(string companyName, string productName, LogLevel? logLevel = null)
-        : this(new FileInfo(Path.Combine(basePath, companyName, productName, settingsFolderName)), logLevel)
+    public JsonSettingsManager(string companyName, string productName, LogLevel? logLevel = null, IEncryptionProvider? encryptionProvider = null)
+        : this(new FileInfo(Path.Combine(basePath, companyName, productName, settingsFolderName)), logLevel, encryptionProvider)
     {
 
     }
 
-    public JsonSettingsManager(FileConnectionString connectionString)
-        : this(new JsonConnectionEx(connectionString)) { }
+    public JsonSettingsManager(FileConnectionString connectionString, IEncryptionProvider? encryptionProvider = null)
+        : this(new JsonConnectionEx(connectionString), encryptionProvider) { }
 
-    public JsonSettingsManager(FileInfo jsonSettingsPath, LogLevel? logLevel = null)
+    public JsonSettingsManager(FileInfo jsonSettingsPath, LogLevel? logLevel = null, IEncryptionProvider? encryptionProvider = null)
         : this(new JsonConnectionEx(new FileConnectionString()
         {
             DataSource = jsonSettingsPath.FullName,
             CreateIfNotExist = true,
             LogLevel = logLevel,
             Formatted = true
-        })) { }
+        }), encryptionProvider) { }
 
-    private JsonSettingsManager(JsonConnectionEx jsonConnectionEx)
-        : base(jsonConnectionEx)
+    private JsonSettingsManager(JsonConnectionEx jsonConnectionEx, IEncryptionProvider? encryptionProvider = null)
+        : base(jsonConnectionEx, true, encryptionProvider)
     {
         this.jsonConnectionEx = jsonConnectionEx;
     }

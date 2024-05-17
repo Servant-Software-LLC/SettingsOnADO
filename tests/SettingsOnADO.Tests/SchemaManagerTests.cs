@@ -1,12 +1,10 @@
-﻿namespace SettingsOnADO.Tests;
-
-using System;
-using System.Data.Common;
+﻿using System.Data.Common;
 using System.Reflection;
 using Microsoft.Data.Sqlite;
-using SettingsOnADO;
 using SettingsOnADO.Tests.TestClasses;
 using Xunit;
+
+namespace SettingsOnADO.Tests;
 
 public class SchemaManagerTests : IDisposable
 {
