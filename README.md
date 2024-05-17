@@ -67,6 +67,46 @@ settingsManager.Update(setting);
 
 For more detailed documentation, check our [Wiki](#).
 
+## Using AesEncryptionProvider for Encryption
+
+SettingsOnADO provides a default AES-based encryption provider. Here’s how to use it:
+
+```csharp
+using SettingsOnADO;
+
+// Set up a connection to the ADO.NET Data Provider (as needed)
+var connection = new SqliteConnection("Data Source=:memory:");
+connection.Open();
+
+// Define key and IV (ensure proper key length for AES)
+byte[] key = Encoding.UTF8.GetBytes("your-256-bit-key"); // 32 bytes
+byte[] iv = Encoding.UTF8.GetBytes("your-128-bit-iv");   // 16 bytes
+
+var encryptionProvider = new AesEncryptionProvider(key, iv);
+var settingsManager = new SettingsManager(connection, true, encryptionProvider);
+
+// Now you can use settingsManager to get and update settings with encryption.
+```
+
+## Example: Using DataProtectionProvider for Encryption
+
+Here is an example of how to use `DataProtectionProvider` with the `SettingsOnADO` library:
+
+```csharp
+using Microsoft.AspNetCore.DataProtection;
+using SettingsOnADO;
+
+// Set up a connection to the ADO.NET Data Provider (as needed)
+var connection = new SqliteConnection("Data Source=:memory:");
+connection.Open();
+
+var dataProtectionProvider = DataProtectionProvider.Create("SettingsOnADO");
+var encryptionProvider = new DataProtectionEncryptionProvider(dataProtectionProvider);
+var settingsManager = new SettingsManager(connection, true, encryptionProvider);
+
+// Now you can use settingsManager to get and update settings with encryption.
+```
+
 ## Contributing
 
 We welcome contributions to SettingsOnADO! Here's how you can help:

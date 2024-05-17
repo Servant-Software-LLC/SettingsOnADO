@@ -4,7 +4,9 @@ using System.Reflection;
 namespace SettingsOnADO;
 
 public interface ISchemaManager : IDisposable
-{    
+{
+    string DataSource { get; }
+
     DataRow? GetRow(string tableName);
 
     void InsertTableData(string tableName, IEnumerable<InsertValue> insertValues);
