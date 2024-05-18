@@ -11,5 +11,5 @@ public class ConnectionStrings
     public virtual FileConnectionString TablesFolderAsDB => new FileConnectionString() { DataSource = FolderWithTables, Formatted = true };
     public virtual FileConnectionString EmptyWithTablesFolderAsDB => new FileConnectionString() { DataSource = FolderEmptyWithTables, Formatted = true };
 
-    public new static ConnectionStrings Instance => new ConnectionStrings();
+    public static ConnectionStrings Instance => new ConnectionStrings();
 }
