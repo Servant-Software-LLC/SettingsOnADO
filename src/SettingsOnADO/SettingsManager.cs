@@ -8,7 +8,7 @@ public class SettingsManager : ISettingsManager, IDisposable
     private readonly IEncryptionProvider? encryptionProvider;
 
     public SettingsManager(DbConnection connection, bool shouldCloseConnection = true, IEncryptionProvider? encryptionProvider = null)
-        : this(new SchemaManager(connection, shouldCloseConnection)) { }
+        : this(new SchemaManager(connection, shouldCloseConnection), encryptionProvider) { }
 
     public SettingsManager(ISchemaManager schemaManager, IEncryptionProvider? encryptionProvider = null)
     {
