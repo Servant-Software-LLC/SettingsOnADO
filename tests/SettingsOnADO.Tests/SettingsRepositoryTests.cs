@@ -16,9 +16,11 @@ public class SettingsRepositoryTests
         var dataTable = new DataTable();
         dataTable.Columns.Add("Id", typeof(int));
         dataTable.Columns.Add("Name", typeof(string));
+        dataTable.Columns.Add("Age", typeof(string));
         var row = dataTable.NewRow();
         row["Id"] = 1;
         row["Name"] = "TestName";
+        row["Age"] = "Adult";
         dataTable.Rows.Add(row);
 
         schemaManagerMock.Setup(m => m.GetRow(It.IsAny<string>())).Returns(row);
@@ -32,6 +34,7 @@ public class SettingsRepositoryTests
         Assert.NotNull(result);
         Assert.Equal("TestName", result.Name);
         Assert.Equal(1, result.Id);
+        Assert.Equal(Age.Adult, result.Age);
     }
 
     [Fact]
@@ -74,7 +77,7 @@ public class SettingsRepositoryTests
         schemaManagerMock.Setup(m => m.GetRow(It.IsAny<string>())).Returns((DataRow)null); // Simulate table does not exist
 
         var repository = new SettingsRepository(schemaManagerMock.Object, null);
-        var testSettings = new TestSettings { Id = 2, Name = "NewName" };
+        var testSettings = new TestSettings { Id = 2, Name = "NewName", Age=Age.Baby };
 
         // Act
         repository.Update(testSettings);
@@ -92,15 +95,17 @@ public class SettingsRepositoryTests
         var dataTable = new DataTable();
         dataTable.Columns.Add("Id", typeof(int));
         dataTable.Columns.Add("Name", typeof(string));
+        dataTable.Columns.Add("Age", typeof(string));
         var row = dataTable.NewRow();
         row["Id"] = 1;
         row["Name"] = "OriginalName";
+        row["Age"] = "Toddler";
         dataTable.Rows.Add(row);
 
         schemaManagerMock.Setup(m => m.GetRow(It.IsAny<string>())).Returns(row);
 
         var repository = new SettingsRepository(schemaManagerMock.Object, null);
-        var updatedSettings = new TestSettings { Id = 1, Name = "UpdatedName" };
+        var updatedSettings = new TestSettings { Id = 1, Name = "UpdatedName", Age = Age.Adult };
 
         // Act
         repository.Update(updatedSettings);

@@ -177,6 +177,10 @@ public class SchemaManager : ISchemaManager
 
     protected virtual string GetSqlColumnType(Type type)
     {
+        // Enum types are stored as strings.
+        if (type.IsEnum)
+            type = typeof(string);
+
         if (type == typeof(int))
             return "INT";
         else if (type == typeof(decimal) || type == typeof(double))
