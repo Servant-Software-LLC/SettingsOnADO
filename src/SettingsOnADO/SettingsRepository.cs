@@ -100,11 +100,6 @@ public class SettingsRepository : ISettingsRepository
                     //Get the value of the property
                     var propertyValue = GetEncryptedPropertyValue(settings, property);
 
-                    object convertedValue = ConvertValue(propertyValue, column.DataType);
-
-                    //Get the value of the column
-                    var columnValue = dataRow[column];
-
                     //Add the column for INSERT
                     insertColumns.Add(new InsertValue(property.Name, propertyValue));
 
@@ -117,7 +112,7 @@ public class SettingsRepository : ISettingsRepository
                     schemaManager.AddColumn(tableName, property);
 
                     //Get the value of the property
-                    var propertyValue = property.GetValue(settings);
+                    var propertyValue = GetEncryptedPropertyValue(settings, property);
 
                     insertColumns.Add(new InsertValue(property.Name, propertyValue));
 
@@ -140,7 +135,7 @@ public class SettingsRepository : ISettingsRepository
                 schemaManager.AddColumn(tableName, property);
 
                 //Get the value of the property
-                var propertyValue = property.GetValue(settings);
+                var propertyValue = GetEncryptedPropertyValue(settings, property);
 
                 insertColumns.Add(new InsertValue(property.Name, propertyValue));
 
