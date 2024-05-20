@@ -185,6 +185,15 @@ public class SettingsRepository : ISettingsRepository
     {
         if (value.GetType() != targetType)
         {
+            //Enum types are stored as strings.  Convert the string to the enum type.
+            if (targetType.IsEnum)
+            {
+                if (value is not string stringValue)
+                    throw new Exception("Enum types must be stored as strings in the database.");
+
+                return Enum.Parse(targetType, stringValue);
+            }
+
             try
             {
                 return Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
