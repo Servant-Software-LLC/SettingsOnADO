@@ -82,6 +82,31 @@ public class JsonSettingsManagerTests
     }
 
     [Fact]
+    public void Update_SettingsContainsEnumProperty_Success()
+    {
+        // Provide a unique sandbox for this test
+        var sandboxId = $"{GetType().FullName}.{MethodBase.GetCurrentMethod()!.Name}";
+        var sandboxConnectionString = ConnectionStrings.Instance.EmptyWithTablesFolderAsDB.Sandbox("Sandbox", sandboxId);
+
+        // Arrange
+        var jsonSettingsManager = new JsonSettingsManager(sandboxConnectionString);
+        var adoProviderSettings = new AdoProviderSettings
+        {
+            CertificatePolicy = CertificatePolicyEnum.TrustSelfSignedCertificates,
+        };
+
+        // Act
+        jsonSettingsManager.Update(adoProviderSettings);
+        var result = jsonSettingsManager.Get<AdoProviderSettings>();
+
+        // Assert
+        Assert.NotNull(result);
+
+        // Check that the new values are set
+        Assert.Equal(adoProviderSettings.CertificatePolicy, result.CertificatePolicy);
+    }
+
+    [Fact]
     public void Update_WhenCalledWithNewValues_ReturnsInstanceWithNewValues()
     {
         // Provide a unique sandbox for this test

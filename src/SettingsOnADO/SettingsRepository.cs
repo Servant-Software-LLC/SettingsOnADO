@@ -37,8 +37,8 @@ public class SettingsRepository : ISettingsRepository
                     object value = dataRow[dataColumn];
                     if (Attribute.IsDefined(property, typeof(EncryptedAttribute)) && encryptionProvider != null)
                     {
-                        if (property.PropertyType != typeof(string))
-                            throw new InvalidOperationException("Only string properties can be encrypted.");
+                        if (property.PropertyType != typeof(string) && !property.PropertyType.IsEnum)
+                            throw new InvalidOperationException("Only string and enum properties can be encrypted.");
 
                         value = encryptionProvider.Decrypt((string)value);
                     }
@@ -169,11 +169,19 @@ public class SettingsRepository : ISettingsRepository
     private object? GetEncryptedPropertyValue<TSettingsEntity>(TSettingsEntity settings, PropertyInfo? property) where TSettingsEntity : class, new()
     {
         var propertyValue = property.GetValue(settings);
+        var propertyType = property.PropertyType;
+
+        //Enum types are stored as strings.
+        if (propertyType.IsEnum)
+        {
+            propertyValue = propertyValue.ToString();
+            propertyType = typeof(string);
+        }
 
         if (Attribute.IsDefined(property, typeof(EncryptedAttribute)) && encryptionProvider != null)
         {
-            if (property.PropertyType != typeof(string))
-                throw new InvalidOperationException("Only string properties can be encrypted.");
+            if (propertyType != typeof(string))
+                throw new InvalidOperationException("Only string or enum properties can be encrypted.");
 
             propertyValue = encryptionProvider.Encrypt((string)propertyValue);
         }
