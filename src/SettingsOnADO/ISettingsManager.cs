@@ -1,6 +1,6 @@
 ﻿namespace SettingsOnADO;
 
-public interface ISettingsManager : IDisposable
+public interface ISettingsManager : ISettingsPubSub, IDisposable
 {
     string DataSource { get; }
 

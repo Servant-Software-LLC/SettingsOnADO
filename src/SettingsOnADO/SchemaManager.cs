@@ -1,5 +1,4 @@
-﻿using SettingsOnADO.Utils;
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
 using System.Reflection;
 using System.Text;
@@ -8,7 +7,7 @@ namespace SettingsOnADO;
 
 public class SchemaManager : ISchemaManager
 {
-    private readonly DbConnection connection;
+    protected readonly DbConnection connection;
     private readonly bool shouldCloseConnection;
     public SchemaManager(DbConnection connection, bool shouldCloseConnection = true)
     {
@@ -24,14 +23,10 @@ public class SchemaManager : ISchemaManager
 
     public string DataSource => connection.DataSource;
 
-    public DataRow? GetRow(string tableName)
+    public virtual DataRow? GetRow(string tableName)
     {
         // Determine if the table exists
-        var tablesList = connection.GetSchema("Tables");
-
-        // Look through the table name column to see if the table exists
-        bool tableExists = tablesList.Rows.Cast<DataRow>().Any(row => row["TABLE_NAME"].ToString() == tableName);
-        if (!tableExists)
+        if (!TableExists(tableName))
         {
             return null;
         }
@@ -40,15 +35,13 @@ public class SchemaManager : ISchemaManager
         {
             command.CommandText = $"SELECT * FROM {tableName}";
 
-            using (DbDataAdapter adapter = AdoNetProviderHelper.CreateDataAdapter(connection))
+            DataTable dataTable = new DataTable();
+            using (var reader = command.ExecuteReader())
             {
-                adapter.SelectCommand = command;
-
-                DataTable dataTable = new DataTable();
-                adapter.Fill(dataTable);
-
-                return dataTable.Rows.Count > 0 ? dataTable.Rows[0] : null;
+                dataTable.Load(reader);
             }
+
+            return dataTable.Rows.Count > 0 ? dataTable.Rows[0] : null;
         }
     }
 
@@ -192,4 +185,11 @@ public class SchemaManager : ISchemaManager
         else
             throw new ArgumentException($"Unsupported type: {type.Name}");
     }
+
+    protected virtual bool TableExists(string tableName)
+    {
+        var tablesList = connection.GetSchema("Tables");
+        return tablesList.Rows.Cast<DataRow>().Any(row => row["TABLE_NAME"].ToString() == tableName);
+    }
+
 }
