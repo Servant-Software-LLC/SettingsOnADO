@@ -4,7 +4,7 @@ using Xunit;
 
 namespace SettingsOnADO.Tests;
 
-public class SettingsManagerTests
+public class SettingsManagerTests : IDisposable
 {
     private readonly Mock<ISettingsRepository> _mockSettingsRepository;
     private readonly SettingsManager _settingsManager;
@@ -118,6 +118,6 @@ public class SettingsManagerTests
 
     public void Dispose()
     {
-        _settingsManager.Dispose();
+        _settingsManager?.Dispose();
     }
 }

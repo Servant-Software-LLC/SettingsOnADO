@@ -74,7 +74,7 @@ public class SettingsRepositoryTests
     {
         // Arrange
         var schemaManagerMock = new Mock<ISchemaManager>();
-        schemaManagerMock.Setup(m => m.GetRow(It.IsAny<string>())).Returns((DataRow)null); // Simulate table does not exist
+        schemaManagerMock.Setup(m => m.GetRow(It.IsAny<string>())).Returns(null as DataRow); // Simulate table does not exist
 
         var repository = new SettingsRepository(schemaManagerMock.Object, null);
         var testSettings = new TestSettings { Id = 2, Name = "NewName", Age=Age.Baby };

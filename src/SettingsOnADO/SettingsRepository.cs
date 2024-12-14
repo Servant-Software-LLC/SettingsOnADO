@@ -75,6 +75,9 @@ public class SettingsRepository : ISettingsRepository
                 //Get the value of the property
                 object? propertyValue = GetEncryptedPropertyValue(settings, property);
 
+                if (propertyValue == null)
+                    throw new ArgumentNullException(nameof(propertyValue));
+
                 insertColumns.Add(new InsertValue(property.Name, propertyValue));
             }
         }
@@ -100,6 +103,9 @@ public class SettingsRepository : ISettingsRepository
                     //Get the value of the property
                     var propertyValue = GetEncryptedPropertyValue(settings, property);
 
+                    if (propertyValue == null)
+                        throw new ArgumentNullException(nameof(propertyValue));
+
                     //Add the column for INSERT
                     insertColumns.Add(new InsertValue(property.Name, propertyValue));
 
@@ -112,7 +118,10 @@ public class SettingsRepository : ISettingsRepository
                     schemaManager.AddColumn(tableName, property);
 
                     //Get the value of the property
-                    var propertyValue = GetEncryptedPropertyValue(settings, property);
+                    object? propertyValue = GetEncryptedPropertyValue(settings, property);
+
+                    if (propertyValue == null)
+                        throw new ArgumentNullException(nameof(propertyValue));
 
                     insertColumns.Add(new InsertValue(property.Name, propertyValue));
 
@@ -135,7 +144,10 @@ public class SettingsRepository : ISettingsRepository
                 schemaManager.AddColumn(tableName, property);
 
                 //Get the value of the property
-                var propertyValue = GetEncryptedPropertyValue(settings, property);
+                object? propertyValue = GetEncryptedPropertyValue(settings, property);
+
+                if (propertyValue == null)
+                    throw new ArgumentNullException(nameof(propertyValue));
 
                 insertColumns.Add(new InsertValue(property.Name, propertyValue));
 
@@ -168,13 +180,22 @@ public class SettingsRepository : ISettingsRepository
     /// <exception cref="InvalidOperationException">Thrown when the property is marked with the EncryptedAttribute but its type is not string.</exception>
     private object? GetEncryptedPropertyValue<TSettingsEntity>(TSettingsEntity settings, PropertyInfo? property) where TSettingsEntity : class, new()
     {
+        if (property == null)
+            throw new ArgumentNullException(nameof(property));
+
         var propertyValue = property.GetValue(settings);
+        if (propertyValue == null)
+            throw new ArgumentNullException(nameof(propertyValue));
+
         var propertyType = property.PropertyType;
 
         //Enum types are stored as strings.
         if (propertyType.IsEnum)
         {
             propertyValue = propertyValue.ToString();
+            if (propertyValue == null)
+                throw new ArgumentNullException(nameof(propertyValue));
+
             propertyType = typeof(string);
         }
 

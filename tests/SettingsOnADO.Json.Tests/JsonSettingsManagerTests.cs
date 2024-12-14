@@ -50,10 +50,10 @@ public class JsonSettingsManagerTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(true, result.CaseSensitive);
+        Assert.True(result.CaseSensitive);
         Assert.Equal("NewMockDB", result.DefaultDatabaseName);
         Assert.Equal(3000, result.MaxAllTableRowCount);
-        Assert.Equal(true, result.SeedDatabases);        
+        Assert.True(result.SeedDatabases);        
     }
 
     /// <summary>
@@ -74,10 +74,10 @@ public class JsonSettingsManagerTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(true, result.CaseSensitive);
+        Assert.True(result.CaseSensitive);
         Assert.Equal("NewMockDB", result.DefaultDatabaseName);
         Assert.Equal(3000, result.MaxAllTableRowCount);
-        Assert.Equal(true, result.SeedDatabases);
+        Assert.True(result.SeedDatabases);
         Assert.Equal(7, result.SettingsAddedInThisVersion); // 7 is the default value for this property
     }
 

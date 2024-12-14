@@ -28,8 +28,8 @@ public class SchemaManagerTests : IDisposable
         string tableName = "TestTable";
         PropertyInfo[] properties = new PropertyInfo[]
         {
-            typeof(TestEntity).GetProperty(nameof(TestEntity.Id)),
-            typeof(TestEntity).GetProperty(nameof(TestEntity.Name))
+            typeof(TestEntity).GetProperty(nameof(TestEntity.Id))!,
+            typeof(TestEntity).GetProperty(nameof(TestEntity.Name))!
         };
 
         // Act
@@ -51,8 +51,8 @@ public class SchemaManagerTests : IDisposable
         string tableName = "TestTable";
         _schemaManager.CreateTable(tableName, new[]
         {
-            typeof(TestEntity).GetProperty(nameof(TestEntity.Id)),
-            typeof(TestEntity).GetProperty(nameof(TestEntity.Name))
+            typeof(TestEntity).GetProperty(nameof(TestEntity.Id))!,
+            typeof(TestEntity).GetProperty(nameof(TestEntity.Name))!
         });
 
         // Act
@@ -84,10 +84,10 @@ public class SchemaManagerTests : IDisposable
         string tableName = "TestTable";
         _schemaManager.CreateTable(tableName, new[]
         {
-            typeof(TestEntity).GetProperty(nameof(TestEntity.Id)),
-            typeof(TestEntity).GetProperty(nameof(TestEntity.Name))
+            typeof(TestEntity).GetProperty(nameof(TestEntity.Id))!,
+            typeof(TestEntity).GetProperty(nameof(TestEntity.Name))!
         });
-        _schemaManager.AddColumn(tableName, typeof(TestEntity).GetProperty(nameof(TestEntity.Age)));
+        _schemaManager.AddColumn(tableName, typeof(TestEntity).GetProperty(nameof(TestEntity.Age))!);
 
         Assert.True(ColumnExists(tableName, "Age"));
 
