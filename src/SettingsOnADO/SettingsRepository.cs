@@ -19,7 +19,7 @@ public class SettingsRepository : ISettingsRepository
     {
         TSettingsEntity settings = new();
 
-        var dataRow = schemaManager.GetRow(typeof(TSettingsEntity).Name);
+        var dataRow = schemaManager.GetRow(GetTableName<TSettingsEntity>());
         
         //Apply the settings from the database table to the settings object
         if (dataRow != null)
@@ -56,7 +56,7 @@ public class SettingsRepository : ISettingsRepository
 
     public void Update<TSettingsEntity>(TSettingsEntity settings) where TSettingsEntity : class, new()
     {
-        var tableName = typeof(TSettingsEntity).Name;
+        var tableName = GetTableName<TSettingsEntity>();
         var dataRow = schemaManager.GetRow(tableName);
 
         //Sort the properties of the entity (needed in either the case of creating the table or to determine
@@ -215,4 +215,7 @@ public class SettingsRepository : ISettingsRepository
 
         return value;
     }
+
+    private string GetTableName<TSettingsEntity>() where TSettingsEntity : class =>
+        typeof(TSettingsEntity).Name;
 }

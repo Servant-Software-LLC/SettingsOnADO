@@ -5,53 +5,42 @@ namespace SettingsOnADO;
 
 public class SettingsManager : ISettingsManager, ISettingsPubSub, IDisposable
 {
-    private readonly ISchemaManager schemaManager;
-    private readonly IEncryptionProvider? encryptionProvider;
-    private readonly ConcurrentTypeActionCollection subscribers = new();
+    private readonly ISettingsRepository settingsRepository;
+    private readonly ISchemaManager? schemaManager;
+    private readonly SettingsPubSub settingsPubSub = new();
 
     public SettingsManager(DbConnection connection, bool shouldCloseConnection = true, IEncryptionProvider? encryptionProvider = null)
         : this(new SchemaManager(connection, shouldCloseConnection), encryptionProvider) { }
 
     public SettingsManager(ISchemaManager schemaManager, IEncryptionProvider? encryptionProvider = null)
+        : this(new SettingsRepository(schemaManager, encryptionProvider)) 
     {
+        //Save a reference for proper disposal.
         this.schemaManager = schemaManager ?? throw new ArgumentNullException(nameof(schemaManager));
-        this.encryptionProvider = encryptionProvider;
     }
-
-    public string DataSource => schemaManager.DataSource;
-
-    public virtual TSettingsEntity Get<TSettingsEntity>() where TSettingsEntity : class, new()
+    
+    public SettingsManager(ISettingsRepository settingsRepository)
     {
-        var repository = new SettingsRepository(schemaManager, encryptionProvider);
-        return repository.Get<TSettingsEntity>();
+        this.settingsRepository = settingsRepository ?? throw new ArgumentNullException(nameof(settingsRepository));
     }
+
+    public string DataSource => schemaManager == null ? "<None>" : schemaManager.DataSource;
+
+    public virtual TSettingsEntity Get<TSettingsEntity>() where TSettingsEntity : class, new() => 
+        settingsRepository.Get<TSettingsEntity>();
 
     public virtual void Update<TSettingsEntity>(TSettingsEntity settings) where TSettingsEntity : class, new()
     {
-        var repository = new SettingsRepository(schemaManager, encryptionProvider);
-        var oldSettings = repository.Get<TSettingsEntity>();
-        repository.Update(settings);
-        OnSettingsChanged(oldSettings, settings);
+        var oldSettings = settingsRepository.Get<TSettingsEntity>();
+        settingsRepository.Update(settings);
+        settingsPubSub.Notify(oldSettings, settings);
     }
 
-    public void Subscribe<TSettingsEntity>(Action<SettingsChangeEventArgs<TSettingsEntity>> handler) where TSettingsEntity : class, new()
-    {
-        subscribers.AddOrUpdate(handler);
-    }
+    public void Subscribe<TSettingsEntity>(Action<SettingsChangeEventArgs<TSettingsEntity>> handler) where TSettingsEntity : class, new() =>
+        settingsPubSub.Subscribe(handler);
 
-    public bool Unsubscribe<TSettingsEntity>(Action<SettingsChangeEventArgs<TSettingsEntity>> handler) where TSettingsEntity : class, new()
-    {
-        return subscribers.Remove(handler);
-    }
-
-    private void OnSettingsChanged<TSettingsEntity>(TSettingsEntity oldSettings, TSettingsEntity newSettings) where TSettingsEntity : class, new()
-    {
-        var actions = subscribers.GetActions<TSettingsEntity>();
-        foreach (var action in actions)
-        {
-            action?.Invoke(new SettingsChangeEventArgs<TSettingsEntity>(oldSettings, newSettings));
-        }
-    }
+    public bool Unsubscribe<TSettingsEntity>(Action<SettingsChangeEventArgs<TSettingsEntity>> handler) where TSettingsEntity : class, new() =>
+        settingsPubSub.Unsubscribe(handler);
 
     public void Dispose()
     {

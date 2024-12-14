@@ -9,6 +9,7 @@ public class SchemaManager : ISchemaManager
 {
     protected readonly DbConnection connection;
     private readonly bool shouldCloseConnection;
+
     public SchemaManager(DbConnection connection, bool shouldCloseConnection = true)
     {
         this.connection = connection ?? throw new ArgumentNullException(nameof(connection));
