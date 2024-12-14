@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <FileBasedDataProvider>1.0.0.284</FileBasedDataProvider>
+    <FileBasedDataProvider>1.0.0.286</FileBasedDataProvider>
   </PropertyGroup>
 
   <ItemGroup>
