@@ -9,6 +9,7 @@
     <Title>ServantSoftware.SettingsOnADO.Json</Title>
     <Product>An ADO.NET extension for centralizing application settings in a folder of JSON files. Each setting class corresponds to a JSON file, with its contents only having one instance of the setting class serialized.</Product>
     <PackageReadmeFile>README.Json.md</PackageReadmeFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
