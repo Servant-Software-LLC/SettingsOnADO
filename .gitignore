@@ -16,4 +16,7 @@ packages
 *.metaproj
 *.metaproj.tmp
 
-
+# Gas Town / Claude workspace
+.beads/
+.claude/
+.runtime/
