@@ -1,13 +1,14 @@
 ﻿using Data.Common.FileStatements;
 using Data.Common.Interfaces;
 using Data.Common.Utils.ConnectionString;
+using System.Collections.Concurrent;
 using System.Data.JsonClient;
 
 namespace SettingsOnADO.Json;
 
 public class JsonConnectionEx : JsonConnection
 {
-    public readonly Dictionary<string, Type> settingsTypes = new();
+    internal readonly ConcurrentDictionary<string, Type> settingsTypes = new();
 
     public JsonConnectionEx(string connectionString)
         : base(connectionString) { }

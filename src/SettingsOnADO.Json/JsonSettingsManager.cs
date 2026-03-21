@@ -42,18 +42,14 @@ public class JsonSettingsManager : SettingsManager
 
     public override TSettingsEntity Get<TSettingsEntity>()
     {
-        //Check if this TSettingsEntity is already in the settingsTypes dictionary.  If not, then add it
-        if (!jsonConnectionEx.settingsTypes.ContainsKey(typeof(TSettingsEntity).Name))
-            jsonConnectionEx.settingsTypes.Add(typeof(TSettingsEntity).Name, typeof(TSettingsEntity));
+        jsonConnectionEx.settingsTypes.TryAdd(typeof(TSettingsEntity).Name, typeof(TSettingsEntity));
 
         return base.Get<TSettingsEntity>();
     }
 
     public override void Update<TSettingsEntity>(TSettingsEntity settings)
     {
-        //Check if this TSettingsEntity is already in the settingsTypes dictionary.  If not, then add it
-        if (!jsonConnectionEx.settingsTypes.ContainsKey(typeof(TSettingsEntity).Name))
-            jsonConnectionEx.settingsTypes.Add(typeof(TSettingsEntity).Name, typeof(TSettingsEntity));
+        jsonConnectionEx.settingsTypes.TryAdd(typeof(TSettingsEntity).Name, typeof(TSettingsEntity));
 
         base.Update(settings);
     }
