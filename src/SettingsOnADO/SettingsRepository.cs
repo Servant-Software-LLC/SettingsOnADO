@@ -75,10 +75,7 @@ public class SettingsRepository : ISettingsRepository
                 //Get the value of the property
                 object? propertyValue = GetEncryptedPropertyValue(settings, property);
 
-                if (propertyValue == null)
-                    throw new ArgumentNullException(nameof(propertyValue));
-
-                insertColumns.Add(new InsertValue(property.Name, propertyValue));
+                insertColumns.Add(new InsertValue(property.Name, propertyValue ?? DBNull.Value));
             }
         }
         else
@@ -103,11 +100,8 @@ public class SettingsRepository : ISettingsRepository
                     //Get the value of the property
                     var propertyValue = GetEncryptedPropertyValue(settings, property);
 
-                    if (propertyValue == null)
-                        throw new ArgumentNullException(nameof(propertyValue));
-
                     //Add the column for INSERT
-                    insertColumns.Add(new InsertValue(property.Name, propertyValue));
+                    insertColumns.Add(new InsertValue(property.Name, propertyValue ?? DBNull.Value));
 
                     iProperty++;
                     iColumn++;
@@ -120,10 +114,7 @@ public class SettingsRepository : ISettingsRepository
                     //Get the value of the property
                     object? propertyValue = GetEncryptedPropertyValue(settings, property);
 
-                    if (propertyValue == null)
-                        throw new ArgumentNullException(nameof(propertyValue));
-
-                    insertColumns.Add(new InsertValue(property.Name, propertyValue));
+                    insertColumns.Add(new InsertValue(property.Name, propertyValue ?? DBNull.Value));
 
                     iProperty++;
 
@@ -146,10 +137,7 @@ public class SettingsRepository : ISettingsRepository
                 //Get the value of the property
                 object? propertyValue = GetEncryptedPropertyValue(settings, property);
 
-                if (propertyValue == null)
-                    throw new ArgumentNullException(nameof(propertyValue));
-
-                insertColumns.Add(new InsertValue(property.Name, propertyValue));
+                insertColumns.Add(new InsertValue(property.Name, propertyValue ?? DBNull.Value));
 
                 iProperty++;
             }
@@ -185,7 +173,7 @@ public class SettingsRepository : ISettingsRepository
 
         var propertyValue = property.GetValue(settings);
         if (propertyValue == null)
-            throw new ArgumentNullException(nameof(propertyValue));
+            return null;
 
         var propertyType = property.PropertyType;
 
@@ -194,7 +182,7 @@ public class SettingsRepository : ISettingsRepository
         {
             propertyValue = propertyValue.ToString();
             if (propertyValue == null)
-                throw new ArgumentNullException(nameof(propertyValue));
+                return null;
 
             propertyType = typeof(string);
         }
