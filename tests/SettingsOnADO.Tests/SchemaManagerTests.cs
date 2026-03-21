@@ -38,7 +38,11 @@ public class SchemaManagerTests : IDisposable
         // Assert
         using (var command = _connection.CreateCommand())
         {
-            command.CommandText = $"SELECT name FROM sqlite_master WHERE type='table' AND name='{tableName}';";
+            command.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name=@tableName;";
+            var param = command.CreateParameter();
+            param.ParameterName = "@tableName";
+            param.Value = tableName;
+            command.Parameters.Add(param);
             var result = command.ExecuteScalar();
             Assert.Equal(tableName, result);
         }
@@ -65,7 +69,7 @@ public class SchemaManagerTests : IDisposable
         // Assert
         using (var command = _connection.CreateCommand())
         {
-            command.CommandText = $"SELECT Id, Name FROM {tableName} WHERE Id = 1";
+            command.CommandText = $"SELECT Id, Name FROM \"{tableName}\" WHERE Id = 1";
             using (var reader = command.ExecuteReader())
             {
                 while (reader.Read())
@@ -102,7 +106,7 @@ public class SchemaManagerTests : IDisposable
     {
         using (var command = _connection.CreateCommand())
         {
-            command.CommandText = $"PRAGMA table_info({tableName})";
+            command.CommandText = $"PRAGMA table_info(\"{tableName}\")";
             using (var reader = command.ExecuteReader())
             {
                 while (reader.Read())
@@ -116,6 +120,60 @@ public class SchemaManagerTests : IDisposable
         }
 
         return false;
+    }
+
+    [Fact]
+    public void CreateTable_WithQuotesInName_DoesNotAllowInjection()
+    {
+        // A table name containing a double-quote should be escaped, not allow injection
+        string maliciousName = "Test\"Table";
+        PropertyInfo[] properties = new PropertyInfo[]
+        {
+            typeof(TestEntity).GetProperty(nameof(TestEntity.Id))!,
+            typeof(TestEntity).GetProperty(nameof(TestEntity.Name))!
+        };
+
+        // Act — should create a table with the escaped name, not execute injected SQL
+        _schemaManager.CreateTable(maliciousName, properties);
+
+        // Assert — table with the literal name (including the quote) should exist
+        using (var command = _connection.CreateCommand())
+        {
+            command.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name=@tableName;";
+            var param = command.CreateParameter();
+            param.ParameterName = "@tableName";
+            param.Value = maliciousName;
+            command.Parameters.Add(param);
+            var result = command.ExecuteScalar();
+            Assert.Equal(maliciousName, result);
+        }
+    }
+
+    [Fact]
+    public void GetRow_WithQuotesInTableName_ReturnsData()
+    {
+        // Arrange — use SchemaManagerForSqlite which has a working TableExists for SQLite
+        var sqliteSchemaManager = new SchemaManagerForSqlite(_connection, shouldCloseConnection: false);
+        string tableName = "My\"Settings";
+        PropertyInfo[] properties = new PropertyInfo[]
+        {
+            typeof(TestEntity).GetProperty(nameof(TestEntity.Id))!,
+            typeof(TestEntity).GetProperty(nameof(TestEntity.Name))!
+        };
+        sqliteSchemaManager.CreateTable(tableName, properties);
+        sqliteSchemaManager.InsertTableData(tableName, new[]
+        {
+            new InsertValue("Id", 1),
+            new InsertValue("Name", "Test")
+        });
+
+        // Act
+        var row = sqliteSchemaManager.GetRow(tableName);
+
+        // Assert
+        Assert.NotNull(row);
+        Assert.Equal(1, Convert.ToInt32(row["Id"]));
+        Assert.Equal("Test", row["Name"].ToString());
     }
 
     public void Dispose()
