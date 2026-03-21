@@ -34,7 +34,7 @@ public class SchemaManager : ISchemaManager
 
         using (DbCommand command = connection.CreateCommand())
         {
-            command.CommandText = $"SELECT * FROM {tableName}";
+            command.CommandText = $"SELECT * FROM {QuoteIdentifier(tableName)}";
 
             DataTable dataTable = new DataTable();
             using (var reader = command.ExecuteReader())
@@ -48,7 +48,7 @@ public class SchemaManager : ISchemaManager
 
     public void InsertTableData(string tableName, IEnumerable<InsertValue> insertValues)
     {
-        StringBuilder insertColumns = new($"INSERT INTO {tableName} (");
+        StringBuilder insertColumns = new($"INSERT INTO {QuoteIdentifier(tableName)} (");
         StringBuilder insertParameters = new("VALUES (");
 
         using (DbCommand command = connection.CreateCommand())
@@ -66,7 +66,7 @@ public class SchemaManager : ISchemaManager
                     firstProperty = false;
                 }
 
-                insertColumns.Append(insertValue.ColumnName);
+                insertColumns.Append(QuoteIdentifier(insertValue.ColumnName));
                 var paramName = $"@{insertValue.ColumnName}";
                 insertParameters.Append(paramName);
 
@@ -93,7 +93,7 @@ public class SchemaManager : ISchemaManager
     {
         using (DbCommand command = connection.CreateCommand())
         {
-            command.CommandText = $"DELETE FROM {tableName}";
+            command.CommandText = $"DELETE FROM {QuoteIdentifier(tableName)}";
 
             _ = command.ExecuteNonQuery();
         }
@@ -102,7 +102,7 @@ public class SchemaManager : ISchemaManager
     public void CreateTable(string tableName, IEnumerable<PropertyInfo> properties)
     {
         // Build the CREATE TABLE SQL command
-        StringBuilder createTableCommand = new StringBuilder($"CREATE TABLE {tableName} (");
+        StringBuilder createTableCommand = new StringBuilder($"CREATE TABLE {QuoteIdentifier(tableName)} (");
         bool firstProperty = true;
 
         foreach (PropertyInfo prop in properties)
@@ -116,7 +116,7 @@ public class SchemaManager : ISchemaManager
             string columnName = prop.Name;
             string columnType = GetSqlColumnType(prop.PropertyType);
 
-            createTableCommand.Append($"{columnName} {columnType}");
+            createTableCommand.Append($"{QuoteIdentifier(columnName)} {columnType}");
         }
 
         createTableCommand.Append(")");
@@ -136,7 +136,7 @@ public class SchemaManager : ISchemaManager
         string columnType = GetSqlColumnType(property.PropertyType);
 
         // Prepare the ALTER TABLE command to add the new column
-        string sqlAlterTable = $"ALTER TABLE {tableName} ADD {columnName} {columnType};";
+        string sqlAlterTable = $"ALTER TABLE {QuoteIdentifier(tableName)} ADD {QuoteIdentifier(columnName)} {columnType};";
 
         // Execute the command
         using (DbCommand command = connection.CreateCommand())
@@ -149,7 +149,7 @@ public class SchemaManager : ISchemaManager
     public void DropColumn(string tableName, string columnName)
     {
         // Prepare the ALTER TABLE command to drop the column
-        string sql = $"ALTER TABLE {tableName} DROP COLUMN {columnName};";
+        string sql = $"ALTER TABLE {QuoteIdentifier(tableName)} DROP COLUMN {QuoteIdentifier(columnName)};";
 
         // Execute the command
         using (DbCommand command = connection.CreateCommand())
@@ -185,6 +185,16 @@ public class SchemaManager : ISchemaManager
             return "BOOLEAN";
         else
             throw new ArgumentException($"Unsupported type: {type.Name}");
+    }
+
+    protected virtual string QuoteIdentifier(string identifier)
+    {
+        if (string.IsNullOrWhiteSpace(identifier))
+            throw new ArgumentException("Identifier cannot be null or empty.", nameof(identifier));
+
+        // Escape any embedded double quotes by doubling them (SQL standard)
+        var escaped = identifier.Replace("\"", "\"\"");
+        return $"\"{escaped}\"";
     }
 
     protected virtual bool TableExists(string tableName)
