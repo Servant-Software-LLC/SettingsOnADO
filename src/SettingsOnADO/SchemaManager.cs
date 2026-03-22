@@ -205,18 +205,29 @@ public class SchemaManager : ISchemaManager
 
     protected virtual string GetSqlColumnType(Type type)
     {
+        // Unwrap Nullable<T> to its underlying type.
+        var underlying = Nullable.GetUnderlyingType(type);
+        if (underlying != null)
+            type = underlying;
+
         // Enum types are stored as strings.
         if (type.IsEnum)
             type = typeof(string);
 
-        if (type == typeof(int))
+        if (type == typeof(int) || type == typeof(short) || type == typeof(long))
             return "INT";
-        else if (type == typeof(decimal) || type == typeof(double))
+        else if (type == typeof(decimal) || type == typeof(double) || type == typeof(float))
             return "DECIMAL";
         else if (type == typeof(string))
             return "VARCHAR";
         else if (type == typeof(bool))
             return "BOOLEAN";
+        else if (type == typeof(DateTime) || type == typeof(DateTimeOffset))
+            return "DATETIME";
+        else if (type == typeof(Guid))
+            return "VARCHAR";
+        else if (type == typeof(byte[]))
+            return "BLOB";
         else
             throw new ArgumentException($"Unsupported type: {type.Name}");
     }

@@ -214,10 +214,76 @@ public class SchemaManagerTests : IDisposable
         Assert.Equal("Test", row["Name"].ToString());
     }
 
+    [Fact]
+    public void CreateTable_WithExtendedTypes_CreatesAllColumns()
+    {
+        // Arrange
+        string tableName = "ExtendedTypesTable";
+        var properties = typeof(ExtendedTypesEntity).GetProperties();
+
+        // Act
+        _schemaManager.CreateTable(tableName, properties);
+
+        // Assert — verify table was created and all columns exist
+        using (var command = _connection.CreateCommand())
+        {
+            command.CommandText = $"PRAGMA table_info(\"{tableName}\")";
+            using (var reader = command.ExecuteReader())
+            {
+                var columns = new List<string>();
+                while (reader.Read())
+                {
+                    columns.Add(reader.GetString(1));
+                }
+
+                Assert.Contains("LongValue", columns);
+                Assert.Contains("ShortValue", columns);
+                Assert.Contains("FloatValue", columns);
+                Assert.Contains("DateTimeValue", columns);
+                Assert.Contains("DateTimeOffsetValue", columns);
+                Assert.Contains("GuidValue", columns);
+                Assert.Contains("BinaryData", columns);
+            }
+        }
+    }
+
+    [Fact]
+    public void CreateTable_WithNullableInt_CreatesColumn()
+    {
+        // Arrange
+        string tableName = "NullableTable";
+        var properties = new[]
+        {
+            typeof(NullableEntity).GetProperty(nameof(NullableEntity.NullableInt))!
+        };
+
+        // Act
+        _schemaManager.CreateTable(tableName, properties);
+
+        // Assert
+        Assert.True(ColumnExists(tableName, "NullableInt"));
+    }
+
     public void Dispose()
     {
         _schemaManager?.Dispose();
         _connection?.Dispose();
     }
 
+}
+
+internal class ExtendedTypesEntity
+{
+    public long LongValue { get; set; }
+    public short ShortValue { get; set; }
+    public float FloatValue { get; set; }
+    public DateTime DateTimeValue { get; set; }
+    public DateTimeOffset DateTimeOffsetValue { get; set; }
+    public Guid GuidValue { get; set; }
+    public byte[] BinaryData { get; set; } = Array.Empty<byte>();
+}
+
+internal class NullableEntity
+{
+    public int? NullableInt { get; set; }
 }
