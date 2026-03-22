@@ -82,6 +82,44 @@ public class SchemaManagerTests : IDisposable
     }
 
     [Fact]
+    public void UpdateTableData_UpdatesExistingRow()
+    {
+        // Arrange
+        string tableName = "TestTable";
+        _schemaManager.CreateTable(tableName, new[]
+        {
+            typeof(TestEntity).GetProperty(nameof(TestEntity.Id))!,
+            typeof(TestEntity).GetProperty(nameof(TestEntity.Name))!
+        });
+
+        _schemaManager.InsertTableData(tableName, new[]
+        {
+            new InsertValue("Id", 1),
+            new InsertValue("Name", "Original")
+        });
+
+        // Act
+        _schemaManager.UpdateTableData(tableName, new[]
+        {
+            new InsertValue("Id", 1),
+            new InsertValue("Name", "Updated")
+        });
+
+        // Assert
+        using (var command = _connection.CreateCommand())
+        {
+            command.CommandText = $"SELECT Id, Name FROM \"{tableName}\"";
+            using (var reader = command.ExecuteReader())
+            {
+                Assert.True(reader.Read());
+                Assert.Equal(1, reader.GetInt32(0));
+                Assert.Equal("Updated", reader.GetString(1));
+                Assert.False(reader.Read()); // Only one row should exist
+            }
+        }
+    }
+
+    [Fact]
     public void DropColumn_DropsColumn_VerifyByException()
     {
         // Arrange

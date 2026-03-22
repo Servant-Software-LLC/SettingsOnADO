@@ -110,9 +110,10 @@ public class SettingsRepositoryTests
         // Act
         repository.Update(updatedSettings);
 
-        // Verify that DeleteTableData and InsertTableData were called
-        schemaManagerMock.Verify(m => m.DeleteTableData("TestSettings"), Times.Once);
-        schemaManagerMock.Verify(m => m.InsertTableData("TestSettings", It.IsAny<IEnumerable<InsertValue>>()), Times.Once);
+        // Verify that UpdateTableData was called (not DELETE+INSERT)
+        schemaManagerMock.Verify(m => m.UpdateTableData("TestSettings", It.IsAny<IEnumerable<InsertValue>>()), Times.Once);
+        schemaManagerMock.Verify(m => m.DeleteTableData("TestSettings"), Times.Never);
+        schemaManagerMock.Verify(m => m.InsertTableData("TestSettings", It.IsAny<IEnumerable<InsertValue>>()), Times.Never);
     }
 
     [Fact]

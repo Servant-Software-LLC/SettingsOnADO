@@ -150,10 +150,10 @@ public class SettingsRepository : ISettingsRepository
                 iColumn++;
             }
 
-            //Delete the existing data
-            schemaManager.DeleteTableData(tableName);
+            //Update the existing data row atomically
+            schemaManager.UpdateTableData(tableName, insertColumns);
+            return;
         }
-
 
         //Add the new data row to the table.
         schemaManager.InsertTableData(tableName, insertColumns);

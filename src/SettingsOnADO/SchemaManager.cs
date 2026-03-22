@@ -89,6 +89,40 @@ public class SchemaManager : ISchemaManager
         }
     }
 
+    public void UpdateTableData(string tableName, IEnumerable<InsertValue> updateValues)
+    {
+        StringBuilder setClauses = new();
+
+        using (DbCommand command = connection.CreateCommand())
+        {
+            bool firstColumn = true;
+            foreach (var updateValue in updateValues)
+            {
+                if (!firstColumn)
+                {
+                    setClauses.Append(", ");
+                }
+                else
+                {
+                    firstColumn = false;
+                }
+
+                var paramName = $"@{updateValue.ColumnName}";
+                setClauses.Append($"{QuoteIdentifier(updateValue.ColumnName)} = {paramName}");
+
+                DbParameter param = connection.CreateCommand().CreateParameter();
+                param.ParameterName = paramName;
+                param.Value = updateValue.Value;
+
+                command.Parameters.Add(param);
+            }
+
+            command.CommandText = $"UPDATE {QuoteIdentifier(tableName)} SET {setClauses}";
+
+            command.ExecuteNonQuery();
+        }
+    }
+
     public void DeleteTableData(string tableName)
     {
         using (DbCommand command = connection.CreateCommand())
