@@ -174,7 +174,7 @@ public class SettingsManagerWithCacheTests
         {
             // Check that the old and new values are passed to the subscriber
             Assert.Equal(oldSettings.Id, args.OldSettings.Id);
-            Assert.Equal(newSettings.Id, args.OldSettings.Id);
+            Assert.Equal(newSettings.Id, args.NewSettings.Id);
             subscriberCalled = true;
         });
 
