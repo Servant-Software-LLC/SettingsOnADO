@@ -67,6 +67,30 @@ public class SettingsManagerTests : IDisposable
     }
 
     [Fact]
+    public void Delete_ShouldCallRepositoryDeleteAndNotifySubscribers()
+    {
+        // Arrange
+        var oldSettings = new TestSettings { Id = 1, Name = "Old Name" };
+        _mockSettingsRepository.Setup(r => r.Get<TestSettings>()).Returns(oldSettings);
+
+        var subscriberCalled = false;
+        _settingsManager.Subscribe<TestSettings>(args =>
+        {
+            Assert.Equal(oldSettings, args.OldSettings);
+            Assert.Equal(0, args.NewSettings.Id);       // default value
+            Assert.Null(args.NewSettings.Name);          // default value
+            subscriberCalled = true;
+        });
+
+        // Act
+        _settingsManager.Delete<TestSettings>();
+
+        // Assert
+        Assert.True(subscriberCalled);
+        _mockSettingsRepository.Verify(r => r.Delete<TestSettings>(), Times.Once);
+    }
+
+    [Fact]
     public void Subscribe_ShouldCallSubscriberWhenUpdateIsCalled()
     {
         // Arrange

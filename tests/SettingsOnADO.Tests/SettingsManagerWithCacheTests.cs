@@ -151,6 +151,51 @@ public class SettingsManagerWithCacheTests
     }
 
     [Fact]
+    public void Delete_ShouldCallInnerManagerDeleteAndClearCache()
+    {
+        // Arrange
+        var testSettings = new TestSettings { Id = 1, Name = "Test Name" };
+        settingsManagerWithCache.SetCacheValue(testSettings);
+
+        mockSettingsManager.Invocations.Clear();
+
+        // Act
+        settingsManagerWithCache.Delete<TestSettings>();
+
+        // Assert
+        mockSettingsManager.Verify(m => m.Delete<TestSettings>(), Times.Once);
+
+        // Verify cache was cleared - Get should now fall through to inner manager
+        var fallbackSettings = new TestSettings { Id = 2, Name = "From Inner Manager" };
+        mockSettingsManager.Setup(m => m.Get<TestSettings>()).Returns(fallbackSettings);
+        var result = settingsManagerWithCache.Get<TestSettings>();
+        Assert.Equal(fallbackSettings.Id, result.Id);
+    }
+
+    [Fact]
+    public void Delete_ShouldNotifySubscribers()
+    {
+        // Arrange
+        var oldSettings = new TestSettings { Id = 1, Name = "Old Name" };
+        mockSettingsManager.Setup(m => m.Get<TestSettings>()).Returns(oldSettings);
+
+        var subscriberCalled = false;
+        settingsManagerWithCache.Subscribe<TestSettings>(args =>
+        {
+            Assert.Equal(oldSettings.Id, args.OldSettings.Id);
+            Assert.Equal(0, args.NewSettings.Id);       // default value
+            Assert.Null(args.NewSettings.Name);          // default value
+            subscriberCalled = true;
+        });
+
+        // Act
+        settingsManagerWithCache.Delete<TestSettings>();
+
+        // Assert
+        Assert.True(subscriberCalled);
+    }
+
+    [Fact]
     public void Dispose_ShouldDisposeInnerSettingsManager()
     {
         // Act

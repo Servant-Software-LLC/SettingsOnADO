@@ -8,4 +8,6 @@ public interface ISettingsManager : ISettingsPubSub, IDisposable
         where TSettingsEntity : class, new();
     void Update<TSettingsEntity>(TSettingsEntity settings)
         where TSettingsEntity : class, new();
+    void Delete<TSettingsEntity>()
+        where TSettingsEntity : class, new();
 }

@@ -117,6 +117,20 @@ public class SettingsRepositoryTests
     }
 
     [Fact]
+    public void Delete_ShouldCallDeleteTableDataOnSchemaManager()
+    {
+        // Arrange
+        var schemaManagerMock = new Mock<ISchemaManager>();
+        var repository = new SettingsRepository(schemaManagerMock.Object, null);
+
+        // Act
+        repository.Delete<TestSettings>();
+
+        // Assert
+        schemaManagerMock.Verify(m => m.DeleteTableData("TestSettings"), Times.Once);
+    }
+
+    [Fact]
     public void Update_EncryptsPropertiesWithEncryptedAttribute()
     {
         // Arrange

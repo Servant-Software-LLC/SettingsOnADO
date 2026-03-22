@@ -53,4 +53,11 @@ public class JsonSettingsManager : SettingsManager
 
         base.Update(settings);
     }
+
+    public override void Delete<TSettingsEntity>()
+    {
+        jsonConnectionEx.settingsTypes.TryAdd(typeof(TSettingsEntity).Name, typeof(TSettingsEntity));
+
+        base.Delete<TSettingsEntity>();
+    }
 }

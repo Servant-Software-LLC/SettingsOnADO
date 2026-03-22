@@ -40,6 +40,14 @@ public class SettingsManagerWithCache : ISettingsManagerWithCache, ISettingsMana
         return innerSettingsManager.Get<TSettingsEntity>();
     }
 
+    public void Delete<TSettingsEntity>() where TSettingsEntity : class, new()
+    {
+        var oldSettings = Get<TSettingsEntity>();
+        RemoveCacheValue<TSettingsEntity>();
+        innerSettingsManager.Delete<TSettingsEntity>();
+        settingsPubSub.Notify(oldSettings, new TSettingsEntity());
+    }
+
     public void Update<TSettingsEntity>(TSettingsEntity settings) where TSettingsEntity : class, new()
     {
         var oldSettings = Get<TSettingsEntity>();

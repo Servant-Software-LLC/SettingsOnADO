@@ -159,6 +159,12 @@ public class SettingsRepository : ISettingsRepository
         schemaManager.InsertTableData(tableName, insertColumns);
     }
 
+    public void Delete<TSettingsEntity>() where TSettingsEntity : class, new()
+    {
+        var tableName = GetTableName<TSettingsEntity>();
+        schemaManager.DeleteTableData(tableName);
+    }
+
     /// <summary>
     /// Gets the value of a property and encrypts it if the property is marked with the EncryptedAttribute and the encryption provider is available.
     /// </summary>
