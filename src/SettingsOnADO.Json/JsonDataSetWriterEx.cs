@@ -1,6 +1,7 @@
 ﻿using Data.Common.FileStatements;
 using Data.Common.Interfaces;
 using Data.Json.JsonIO;
+using System.Collections.Concurrent;
 using System.Data;
 using System.Reflection;
 using System.Text.Json;
@@ -11,9 +12,9 @@ public class JsonDataSetWriterEx : JsonDataSetWriter
 {
     //This dictionary will hold the settings types for the settings entities.  Entries are added JIT to this dictionary
     //when the Get or Update methods are called in the JsonSettingsManager
-    private readonly Dictionary<string, Type> settingsTypes;
+    private readonly ConcurrentDictionary<string, Type> settingsTypes;
 
-    public JsonDataSetWriterEx(IFileConnection fileConnection, FileStatement fileStatement, Dictionary<string, Type> settingsTypes)
+    public JsonDataSetWriterEx(IFileConnection fileConnection, FileStatement fileStatement, ConcurrentDictionary<string, Type> settingsTypes)
         : base(fileConnection, fileStatement)
     {
         this.settingsTypes = settingsTypes ?? throw new ArgumentNullException(nameof(settingsTypes));
