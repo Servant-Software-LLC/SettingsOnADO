@@ -20,3 +20,4 @@ packages
 .claude/*
 !.claude/skills/
 !.claude/agents/
+/.vscode
