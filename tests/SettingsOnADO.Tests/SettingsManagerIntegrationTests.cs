@@ -60,8 +60,7 @@ public class SettingsManagerIntegrationTests : IDisposable
         encryptedConnection.Open();
 
         var encryptionProvider = new AesEncryptionProvider(
-            Encoding.UTF8.GetBytes("0123456789ABCDEF0123456789ABCDEF"),
-            Encoding.UTF8.GetBytes("0123456789ABCDEF"));
+            Encoding.UTF8.GetBytes("0123456789ABCDEF0123456789ABCDEF"));
 
         using var encryptedManager = new SettingsManager(
             new SchemaManagerForSqlite(encryptedConnection),

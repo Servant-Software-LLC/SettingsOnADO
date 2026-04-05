@@ -185,7 +185,7 @@ public class SettingsRepository : ISettingsRepository
         {
             propertyValue = propertyValue.ToString();
             if (propertyValue == null)
-                return null;
+                return DBNull.Value;
 
             propertyType = typeof(string);
         }
