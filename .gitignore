@@ -16,9 +16,14 @@ packages
 *.metaproj
 *.metaproj.tmp
 
+# Ignore .claude but track skills and agents
+.claude/*
+!.claude/skills/
+!.claude/agents/
+/.vscode
+
 # Gas Town / Claude workspace
 .beads/
-.claude/
 .runtime/
 
 # Gas Town (added by gt)

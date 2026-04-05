@@ -73,9 +73,8 @@ public class SettingsRepository : ISettingsRepository
             foreach (var property in entityProperties)
             {
                 //Get the value of the property
-                object? propertyValue = GetEncryptedPropertyValue(settings, property);
-
-                insertColumns.Add(new InsertValue(property.Name, propertyValue ?? DBNull.Value));
+                var propertyValue = GetPersistedPropertyValue(settings, property);
+                insertColumns.Add(new InsertValue(property.Name, propertyValue));
             }
         }
         else
@@ -98,10 +97,10 @@ public class SettingsRepository : ISettingsRepository
                     //The column and the property have the same name
 
                     //Get the value of the property
-                    var propertyValue = GetEncryptedPropertyValue(settings, property);
+                    var propertyValue = GetPersistedPropertyValue(settings, property);
 
                     //Add the column for INSERT
-                    insertColumns.Add(new InsertValue(property.Name, propertyValue ?? DBNull.Value));
+                    insertColumns.Add(new InsertValue(property.Name, propertyValue));
 
                     iProperty++;
                     iColumn++;
@@ -112,9 +111,8 @@ public class SettingsRepository : ISettingsRepository
                     schemaManager.AddColumn(tableName, property);
 
                     //Get the value of the property
-                    object? propertyValue = GetEncryptedPropertyValue(settings, property);
-
-                    insertColumns.Add(new InsertValue(property.Name, propertyValue ?? DBNull.Value));
+                    var propertyValue = GetPersistedPropertyValue(settings, property);
+                    insertColumns.Add(new InsertValue(property.Name, propertyValue));
 
                     iProperty++;
 
@@ -135,9 +133,8 @@ public class SettingsRepository : ISettingsRepository
                 schemaManager.AddColumn(tableName, property);
 
                 //Get the value of the property
-                object? propertyValue = GetEncryptedPropertyValue(settings, property);
-
-                insertColumns.Add(new InsertValue(property.Name, propertyValue ?? DBNull.Value));
+                var propertyValue = GetPersistedPropertyValue(settings, property);
+                insertColumns.Add(new InsertValue(property.Name, propertyValue));
 
                 iProperty++;
             }
@@ -172,14 +169,14 @@ public class SettingsRepository : ISettingsRepository
     /// <param name="settings">The settings object that contains the property.</param>
     /// <returns>The encrypted property value if the property is marked with the EncryptedAttribute and the encryption provider is available, otherwise the original property value.</returns>
     /// <exception cref="InvalidOperationException">Thrown when the property is marked with the EncryptedAttribute but its type is not string.</exception>
-    private object? GetEncryptedPropertyValue<TSettingsEntity>(TSettingsEntity settings, PropertyInfo? property) where TSettingsEntity : class, new()
+    private object GetPersistedPropertyValue<TSettingsEntity>(TSettingsEntity settings, PropertyInfo? property) where TSettingsEntity : class, new()
     {
         if (property == null)
             throw new ArgumentNullException(nameof(property));
 
         var propertyValue = property.GetValue(settings);
         if (propertyValue == null)
-            return null;
+            return DBNull.Value;
 
         var propertyType = property.PropertyType;
 
@@ -188,7 +185,7 @@ public class SettingsRepository : ISettingsRepository
         {
             propertyValue = propertyValue.ToString();
             if (propertyValue == null)
-                return null;
+                return DBNull.Value;
 
             propertyType = typeof(string);
         }
