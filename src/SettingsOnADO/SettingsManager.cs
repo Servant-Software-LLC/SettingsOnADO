@@ -36,6 +36,13 @@ public class SettingsManager : ISettingsManager, ISettingsPubSub, IDisposable
         settingsPubSub.Notify(oldSettings, settings);
     }
 
+    public virtual void Delete<TSettingsEntity>() where TSettingsEntity : class, new()
+    {
+        var oldSettings = settingsRepository.Get<TSettingsEntity>();
+        settingsRepository.Delete<TSettingsEntity>();
+        settingsPubSub.Notify(oldSettings, new TSettingsEntity());
+    }
+
     public void Subscribe<TSettingsEntity>(Action<SettingsChangeEventArgs<TSettingsEntity>> handler) where TSettingsEntity : class, new() =>
         settingsPubSub.Subscribe(handler);
 

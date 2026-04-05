@@ -21,3 +21,12 @@ packages
 !.claude/skills/
 !.claude/agents/
 /.vscode
+
+# Gas Town / Claude workspace
+.beads/
+.runtime/
+
+# Gas Town (added by gt)
+.logs/
+__pycache__/
+state.json

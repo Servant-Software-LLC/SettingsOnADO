@@ -1,11 +1,12 @@
 ﻿using SettingsOnADO.Utils;
+using System.Collections.Concurrent;
 
 namespace SettingsOnADO;
 
 public class SettingsManagerWithCache : ISettingsManagerWithCache, ISettingsManager
 {
     private readonly ISettingsManager innerSettingsManager;
-    private readonly Dictionary<string, object> settingsCache = new Dictionary<string, object>();
+    private readonly ConcurrentDictionary<string, object> settingsCache = new();
     private readonly SettingsPubSub settingsPubSub = new();
 
     public SettingsManagerWithCache(ISettingsManager innerSettingsManager)
@@ -22,7 +23,7 @@ public class SettingsManagerWithCache : ISettingsManagerWithCache, ISettingsMana
 
     public bool RemoveCacheValue<TSettingsEntity>() where TSettingsEntity : class
     {
-        return settingsCache.Remove(GetCacheKey<TSettingsEntity>());
+        return settingsCache.TryRemove(GetCacheKey<TSettingsEntity>(), out _);
     }
 
     public string DataSource => innerSettingsManager.DataSource;
@@ -37,6 +38,14 @@ public class SettingsManagerWithCache : ISettingsManagerWithCache, ISettingsMana
 
         // Fallback to the inner settings manager
         return innerSettingsManager.Get<TSettingsEntity>();
+    }
+
+    public void Delete<TSettingsEntity>() where TSettingsEntity : class, new()
+    {
+        var oldSettings = Get<TSettingsEntity>();
+        RemoveCacheValue<TSettingsEntity>();
+        innerSettingsManager.Delete<TSettingsEntity>();
+        settingsPubSub.Notify(oldSettings, new TSettingsEntity());
     }
 
     public void Update<TSettingsEntity>(TSettingsEntity settings) where TSettingsEntity : class, new()

@@ -34,7 +34,7 @@ public class SchemaManager : ISchemaManager
 
         using (DbCommand command = connection.CreateCommand())
         {
-            command.CommandText = $"SELECT * FROM {tableName}";
+            command.CommandText = $"SELECT * FROM {QuoteIdentifier(tableName)}";
 
             DataTable dataTable = new DataTable();
             using (var reader = command.ExecuteReader())
@@ -48,7 +48,7 @@ public class SchemaManager : ISchemaManager
 
     public void InsertTableData(string tableName, IEnumerable<InsertValue> insertValues)
     {
-        StringBuilder insertColumns = new($"INSERT INTO {tableName} (");
+        StringBuilder insertColumns = new($"INSERT INTO {QuoteIdentifier(tableName)} (");
         StringBuilder insertParameters = new("VALUES (");
 
         using (DbCommand command = connection.CreateCommand())
@@ -66,7 +66,7 @@ public class SchemaManager : ISchemaManager
                     firstProperty = false;
                 }
 
-                insertColumns.Append(insertValue.ColumnName);
+                insertColumns.Append(QuoteIdentifier(insertValue.ColumnName));
                 var paramName = $"@{insertValue.ColumnName}";
                 insertParameters.Append(paramName);
 
@@ -89,11 +89,45 @@ public class SchemaManager : ISchemaManager
         }
     }
 
+    public void UpdateTableData(string tableName, IEnumerable<InsertValue> updateValues)
+    {
+        StringBuilder setClauses = new();
+
+        using (DbCommand command = connection.CreateCommand())
+        {
+            bool firstColumn = true;
+            foreach (var updateValue in updateValues)
+            {
+                if (!firstColumn)
+                {
+                    setClauses.Append(", ");
+                }
+                else
+                {
+                    firstColumn = false;
+                }
+
+                var paramName = $"@{updateValue.ColumnName}";
+                setClauses.Append($"{QuoteIdentifier(updateValue.ColumnName)} = {paramName}");
+
+                DbParameter param = connection.CreateCommand().CreateParameter();
+                param.ParameterName = paramName;
+                param.Value = updateValue.Value;
+
+                command.Parameters.Add(param);
+            }
+
+            command.CommandText = $"UPDATE {QuoteIdentifier(tableName)} SET {setClauses}";
+
+            command.ExecuteNonQuery();
+        }
+    }
+
     public void DeleteTableData(string tableName)
     {
         using (DbCommand command = connection.CreateCommand())
         {
-            command.CommandText = $"DELETE FROM {tableName}";
+            command.CommandText = $"DELETE FROM {QuoteIdentifier(tableName)}";
 
             _ = command.ExecuteNonQuery();
         }
@@ -102,7 +136,7 @@ public class SchemaManager : ISchemaManager
     public void CreateTable(string tableName, IEnumerable<PropertyInfo> properties)
     {
         // Build the CREATE TABLE SQL command
-        StringBuilder createTableCommand = new StringBuilder($"CREATE TABLE {tableName} (");
+        StringBuilder createTableCommand = new StringBuilder($"CREATE TABLE {QuoteIdentifier(tableName)} (");
         bool firstProperty = true;
 
         foreach (PropertyInfo prop in properties)
@@ -116,7 +150,7 @@ public class SchemaManager : ISchemaManager
             string columnName = prop.Name;
             string columnType = GetSqlColumnType(prop.PropertyType);
 
-            createTableCommand.Append($"{columnName} {columnType}");
+            createTableCommand.Append($"{QuoteIdentifier(columnName)} {columnType}");
         }
 
         createTableCommand.Append(")");
@@ -136,7 +170,7 @@ public class SchemaManager : ISchemaManager
         string columnType = GetSqlColumnType(property.PropertyType);
 
         // Prepare the ALTER TABLE command to add the new column
-        string sqlAlterTable = $"ALTER TABLE {tableName} ADD {columnName} {columnType};";
+        string sqlAlterTable = $"ALTER TABLE {QuoteIdentifier(tableName)} ADD {QuoteIdentifier(columnName)} {columnType};";
 
         // Execute the command
         using (DbCommand command = connection.CreateCommand())
@@ -149,7 +183,7 @@ public class SchemaManager : ISchemaManager
     public void DropColumn(string tableName, string columnName)
     {
         // Prepare the ALTER TABLE command to drop the column
-        string sql = $"ALTER TABLE {tableName} DROP COLUMN {columnName};";
+        string sql = $"ALTER TABLE {QuoteIdentifier(tableName)} DROP COLUMN {QuoteIdentifier(columnName)};";
 
         // Execute the command
         using (DbCommand command = connection.CreateCommand())
@@ -171,20 +205,41 @@ public class SchemaManager : ISchemaManager
 
     protected virtual string GetSqlColumnType(Type type)
     {
+        // Unwrap Nullable<T> to its underlying type.
+        var underlying = Nullable.GetUnderlyingType(type);
+        if (underlying != null)
+            type = underlying;
+
         // Enum types are stored as strings.
         if (type.IsEnum)
             type = typeof(string);
 
-        if (type == typeof(int))
+        if (type == typeof(int) || type == typeof(short) || type == typeof(long))
             return "INT";
-        else if (type == typeof(decimal) || type == typeof(double))
+        else if (type == typeof(decimal) || type == typeof(double) || type == typeof(float))
             return "DECIMAL";
         else if (type == typeof(string))
             return "VARCHAR";
         else if (type == typeof(bool))
             return "BOOLEAN";
+        else if (type == typeof(DateTime) || type == typeof(DateTimeOffset))
+            return "DATETIME";
+        else if (type == typeof(Guid))
+            return "VARCHAR";
+        else if (type == typeof(byte[]))
+            return "BLOB";
         else
             throw new ArgumentException($"Unsupported type: {type.Name}");
+    }
+
+    protected virtual string QuoteIdentifier(string identifier)
+    {
+        if (string.IsNullOrWhiteSpace(identifier))
+            throw new ArgumentException("Identifier cannot be null or empty.", nameof(identifier));
+
+        // Escape any embedded double quotes by doubling them (SQL standard)
+        var escaped = identifier.Replace("\"", "\"\"");
+        return $"\"{escaped}\"";
     }
 
     protected virtual bool TableExists(string tableName)

@@ -10,6 +10,7 @@ public interface ISchemaManager : IDisposable
     DataRow? GetRow(string tableName);
 
     void InsertTableData(string tableName, IEnumerable<InsertValue> insertValues);
+    void UpdateTableData(string tableName, IEnumerable<InsertValue> updateValues);
     void DeleteTableData(string tableName);
     void CreateTable(string tableName, IEnumerable<PropertyInfo> properties);
     void AddColumn(string tableName, PropertyInfo property);

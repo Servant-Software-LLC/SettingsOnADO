@@ -147,13 +147,19 @@ public class SettingsRepository : ISettingsRepository
                 iColumn++;
             }
 
-            //Delete the existing data
-            schemaManager.DeleteTableData(tableName);
+            //Update the existing data row atomically
+            schemaManager.UpdateTableData(tableName, insertColumns);
+            return;
         }
-
 
         //Add the new data row to the table.
         schemaManager.InsertTableData(tableName, insertColumns);
+    }
+
+    public void Delete<TSettingsEntity>() where TSettingsEntity : class, new()
+    {
+        var tableName = GetTableName<TSettingsEntity>();
+        schemaManager.DeleteTableData(tableName);
     }
 
     /// <summary>
@@ -179,7 +185,7 @@ public class SettingsRepository : ISettingsRepository
         {
             propertyValue = propertyValue.ToString();
             if (propertyValue == null)
-                throw new ArgumentNullException(nameof(propertyValue));
+                return null;
 
             propertyType = typeof(string);
         }

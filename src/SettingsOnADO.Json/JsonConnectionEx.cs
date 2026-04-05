@@ -8,7 +8,7 @@ namespace SettingsOnADO.Json;
 
 public class JsonConnectionEx : JsonConnection
 {
-    public readonly ConcurrentDictionary<string, Type> settingsTypes = new();
+    internal readonly ConcurrentDictionary<string, Type> settingsTypes = new();
 
     public JsonConnectionEx(string connectionString)
         : base(connectionString) { }

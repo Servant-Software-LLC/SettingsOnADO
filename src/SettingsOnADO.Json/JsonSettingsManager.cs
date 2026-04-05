@@ -42,15 +42,22 @@ public class JsonSettingsManager : SettingsManager
 
     public override TSettingsEntity Get<TSettingsEntity>()
     {
-        jsonConnectionEx.settingsTypes.GetOrAdd(typeof(TSettingsEntity).Name, typeof(TSettingsEntity));
+        jsonConnectionEx.settingsTypes.TryAdd(typeof(TSettingsEntity).Name, typeof(TSettingsEntity));
 
         return base.Get<TSettingsEntity>();
     }
 
     public override void Update<TSettingsEntity>(TSettingsEntity settings)
     {
-        jsonConnectionEx.settingsTypes.GetOrAdd(typeof(TSettingsEntity).Name, typeof(TSettingsEntity));
+        jsonConnectionEx.settingsTypes.TryAdd(typeof(TSettingsEntity).Name, typeof(TSettingsEntity));
 
         base.Update(settings);
+    }
+
+    public override void Delete<TSettingsEntity>()
+    {
+        jsonConnectionEx.settingsTypes.TryAdd(typeof(TSettingsEntity).Name, typeof(TSettingsEntity));
+
+        base.Delete<TSettingsEntity>();
     }
 }
